@@ -1,0 +1,16 @@
+{
+  "name": "my-awesome-package",
+  "version": "1.0.0",
+  "description": "The best package you will ever find.",
+  "main": "index.js",
+  "repository": {
+    "url": "https://github.com/yarnpkg/example-yarn-package",
+    "type": "git"
+  },
+  "author": "Yarn Contributor",
+  "license": "MIT",
+  "devDependencies": {
+    "hardhat": "^2.12.0",
+    "prettier": "^2.7.1"
+  }
+}
