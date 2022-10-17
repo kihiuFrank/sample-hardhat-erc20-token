@@ -1,4 +1,4 @@
-const { assert } = require("chai")
+const { assert, expect } = require("chai")
 const { getNamedAccounts, deployments, network, ethers } = require("hardhat")
 const {
   developmentChains,
@@ -8,6 +8,8 @@ const {
 !developmentChains.includes(network.name)
   ? describe.skip
   : describe("Our Token Unit Tests", () => {
+      //Multipler is used to make reading the math easier because of the 18 decimal points
+      const multiplier = 10 ** 18
       let ourToken, deployer, user1
       beforeEach(async () => {
         const accounts = await getNamedAccounts()
@@ -34,6 +36,19 @@ const {
 
           const tokenSymbol = (await ourToken.symbol()).toString()
           assert.equal(tokenSymbol, "OT")
+        })
+      })
+
+      describe("transfers", () => {
+        it("transfers tokens successfully to an address", async () => {
+          const tokensToSend = ethers.utils.parseEther("10")
+          await ourToken.transfer(user1, tokensToSend)
+          expect(await ourToken.balanceOf(user1)).to.equal(tokensToSend)
+        })
+        it("emits a transfer event, when a transfer occurs", async () => {
+          await expect(
+            ourToken.transfer(user1, (10 * multiplier).toString())
+          ).to.emit(ourToken, "Transfer")
         })
       })
     })
