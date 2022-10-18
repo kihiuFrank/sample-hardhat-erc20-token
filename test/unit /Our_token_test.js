@@ -51,4 +51,46 @@ const {
           ).to.emit(ourToken, "Transfer")
         })
       })
+
+      describe("allowances", () => {
+        const amount = (20 * multiplier).toString()
+        beforeEach(async () => {
+          playerToken = await ethers.getContract("OurToken", user1)
+        })
+        it("Should approve other address to spend token", async () => {
+          const tokensToSpend = ethers.utils.parseEther("5")
+          await ourToken.approve(user1, tokensToSpend)
+          const ourToken1 = await ethers.getContract("OurToken", user1)
+          await ourToken1.transferFrom(deployer, user1, tokensToSpend)
+          expect(await ourToken1.balanceOf(user1)).to.equal(tokensToSpend)
+        })
+        it("doesn't allow an unnaproved member to do transfers", async () => {
+          //Deployer is approving that user1 can spend 20 of their precious OT's
+
+          await expect(
+            playerToken.transferFrom(deployer, user1, amount)
+          ).to.be.revertedWith("ERC20: insufficient allowance")
+        })
+        it("emits an approval event, when an approval occurs", async () => {
+          await expect(ourToken.approve(user1, amount)).to.emit(
+            ourToken,
+            "Approval"
+          )
+        })
+        it("the allowance being set is accurate", async () => {
+          await ourToken.approve(user1, amount)
+          const allowance = await ourToken.allowance(deployer, user1)
+          assert.equal(allowance.toString(), amount)
+        })
+        it("won't allow a user to go over the allowance", async () => {
+          await ourToken.approve(user1, amount)
+          await expect(
+            playerToken.transferFrom(
+              deployer,
+              user1,
+              (40 * multiplier).toString()
+            )
+          ).to.be.revertedWith("ERC20: insufficient allowance")
+        })
+      })
     })
